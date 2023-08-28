@@ -1,6 +1,8 @@
+**/nginx-1.20.2/
 **/target/
 .idea
 *.iml
 *.class
 *Test.java
 **/test/
+*.log
