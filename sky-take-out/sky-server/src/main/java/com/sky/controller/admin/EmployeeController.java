@@ -14,12 +14,9 @@ import com.sky.vo.EmployeeLoginVO;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.JsonPath;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -100,11 +97,42 @@ public class EmployeeController {
         return Result.success(pageResult);
     }
 
+    /**
+     * 员工状态控制
+     * @param status
+     * @param id
+     * @return
+     */
     @PostMapping("/status/{status}")
     @ApiOperation("员工状态控制")
     public Result status(@PathVariable Integer status,Long id){
         log.info("员工状态修改：{}, {}",id,status);
         employeeService.status(id,status);
+        return Result.success();
+    }
+
+    /**
+     * 根据ID查询员工
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询员工")
+    public Result<Employee> getById(@PathVariable Integer id){
+        log.info("查询员工信息：{}",id);
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
+    }
+    /**
+     * 员工信息修改
+     * @param employeeDTO
+     * @return
+     */
+    @PutMapping
+    @ApiOperation("员工信息编辑")
+    public Result modify(@RequestBody EmployeeDTO employeeDTO){
+        log.info("员工信息编辑:{}",employeeDTO);
+        employeeService.modify(employeeDTO);
         return Result.success();
     }
 }
