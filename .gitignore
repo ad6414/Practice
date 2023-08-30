@@ -7,3 +7,6 @@
 **/test/
 *.log
 **/logs/
+nginx-1.20.2/logs/access.log
+nginx-1.20.2/logs/error.log
+nginx-1.20.2/logs/nginx.pid
