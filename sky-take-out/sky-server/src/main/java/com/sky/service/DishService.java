@@ -38,4 +38,18 @@ public interface DishService {
      * @param dishDTO
      */
     void modifyDish(DishDTO dishDTO);
+
+    /**
+     * 根据分类id查询菜品
+     * @param categoryId
+     * @return
+     */
+    List<Dish> getByCategoryId(Long categoryId);
+
+    /**
+     * 修改菜品状态
+     * @param id
+     * @param status
+     */
+    void status(Long id, Integer status);
 }
