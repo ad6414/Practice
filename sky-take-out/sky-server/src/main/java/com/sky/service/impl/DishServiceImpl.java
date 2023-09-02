@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.annotation.AutoFill;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
@@ -10,6 +11,7 @@ import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.enumeration.OperationType;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
@@ -86,6 +88,37 @@ public class DishServiceImpl implements DishService {
         for (Long id : ids) {
             dishMapper.deleteById(id);
             dishFlavorMapper.deleteByDishId(id);
+        }
+    }
+
+    /**
+     * 根据菜品ID查询菜品
+     * @param id
+     * @return
+     */
+    public DishVO getById(Long id) {
+        DishVO dishVO = new DishVO();
+        Dish dish = dishMapper.selectById(id);
+        List<DishFlavor> dishFlavorList = dishFlavorMapper.getByDishId(dish.getId());
+        BeanUtils.copyProperties(dish,dishVO);
+        dishVO.setFlavors(dishFlavorList);
+        return dishVO;
+    }
+
+    /**
+     * 修改菜品
+     * @param dishDTO
+     */
+    @Transactional
+    public void modifyDish(DishDTO dishDTO) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO,dish);
+        dishMapper.updateDish(dish);
+        List<DishFlavor> dishFlavorList = dishDTO.getFlavors();
+        dishFlavorMapper.deleteByDishId(dish.getId());
+        for (DishFlavor dishFlavor : dishFlavorList) {
+            dishFlavor.setDishId(dish.getId());
+            dishFlavorMapper.insertFlavor(dishFlavorList);
         }
     }
 }
