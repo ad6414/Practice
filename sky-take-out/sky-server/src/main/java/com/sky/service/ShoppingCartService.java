@@ -30,4 +30,6 @@ public interface ShoppingCartService {
      * @param currentId
      */
     void clean(Long currentId);
+
+    void repetiton(Long id);
 }

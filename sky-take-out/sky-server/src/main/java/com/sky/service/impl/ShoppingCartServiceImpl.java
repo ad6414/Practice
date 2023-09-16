@@ -4,9 +4,11 @@ import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.Dish;
+import com.sky.entity.OrderDetail;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.SetMealMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.service.ShoppingCartService;
@@ -14,6 +16,7 @@ import com.sky.vo.SetmealVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +27,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private ShoppingCartMapper shoppingCartMapper;
     @Autowired private DishMapper dishMapper;
     @Autowired private SetMealMapper setMealMapper;
+    @Autowired private OrderDetailMapper orderDetailMapper;
     /**
      * 查看购物车
      * @return
@@ -64,6 +68,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      * @return
      */
     public void addGoods(ShoppingCartDTO shoppingCartDTO) {
+        //判断菜品或套餐是否存在
+        if (shoppingCartDTO.getDishId() != null) {
+            Dish dish = dishMapper.selectById(shoppingCartDTO.getDishId());
+            if(dish == null){throw new ShoppingCartBusinessException("菜品不存在");}
+        }else {
+            SetmealVO setmealVO = setMealMapper.getById(shoppingCartDTO.getSetmealId());
+            if(setmealVO == null){throw new ShoppingCartBusinessException("套餐不存在");}
+        }
         //查询用户购物车
         ShoppingCart shoppingCart = ShoppingCart.builder().userId(BaseContext.getCurrentId()).build();
         BeanUtils.copyProperties(shoppingCartDTO,shoppingCart);
@@ -100,5 +112,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     public void clean(Long userId) {
         shoppingCartMapper.clean(userId);
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    @Transactional
+    public void repetiton(Long id) {
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        for (OrderDetail detail : orderDetailList) {
+            ShoppingCartDTO shoppingCartDTO = new ShoppingCartDTO();
+            BeanUtils.copyProperties(detail,shoppingCartDTO);
+            addGoods(shoppingCartDTO);
+        }
     }
 }
